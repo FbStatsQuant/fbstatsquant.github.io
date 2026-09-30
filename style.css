@@ -139,8 +139,6 @@ footer p { margin: 0; }
   background: linear-gradient(100deg, var(--accent), var(--accent2));
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 .stats span { font-size: 0.8rem; color: var(--muted); }
-.hint { position: absolute; right: 16px; bottom: 10px; margin: 0; z-index: 2;
-  font: 500 0.72rem ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); opacity: .8; pointer-events: none; }
 
 h2 { position: relative; padding-bottom: 12px; }
 h2::after { content: ""; position: absolute; left: 0; bottom: 0; width: 44px; height: 3px; border-radius: 2px;
@@ -173,8 +171,7 @@ h2::after { content: ""; position: absolute; left: 0; bottom: 0; width: 44px; he
 @media (max-width: 720px) {
   .hero::after { background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 55%, transparent) 60%, transparent 100%); }
   .stats { gap: 22px; }
-  .hint { display: none; }
-}
+  }
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .card, .chips li { transition: none; }
