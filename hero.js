@@ -8,7 +8,7 @@
   var ctx = canvas.getContext('2d');
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var GW = 150, GH = 90;
+  var GW = 260, GH = 156;
   var dens = document.createElement('canvas'); dens.width = GW; dens.height = GH;
   var dctx = dens.getContext('2d');
   var img = dctx.createImageData(GW, GH);
@@ -18,6 +18,8 @@
   var w = 0, h = 0, px0 = 0, pw = 0;
   var colA = [31, 95, 214], colB = [124, 58, 237];
   var mouse = null, visible = true, raf = 0, dirty = true;
+  var prop = 0, accd = 0, tick = 0;
+  var accEl = document.getElementById('acc'), nEl = document.getElementById('nchains');
 
   function copy(m) { return { x: m.x, y: m.y, sx: m.sx, sy: m.sy, rho: m.rho, wt: m.wt }; }
   var HOME = [
@@ -62,10 +64,12 @@
     for (var i = 0; i < chains.length; i++) {
       var c = chains[i];
       for (var r = 0; r < 2; r++) {
-        var nu = c.u + randn() * 0.03, nv = c.v + randn() * 0.03;
+        var nu = c.u + randn() * 0.045, nv = c.v + randn() * 0.045;
         if (nu < 0 || nu > 1 || nv < 0 || nv > 1) continue;
         var np = density(nu, nv);
+        prop++;
         if (Math.random() * c.p < np) {
+          accd++;
           tctx.beginPath(); tctx.moveTo(X(c.u), Y(c.v)); tctx.lineTo(X(nu), Y(nv)); tctx.stroke();
           c.u = nu; c.v = nv; c.p = np;
         }
@@ -110,11 +114,12 @@
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(dens, px0, 0, pw, h);
     ctx.drawImage(trail, 0, 0, w, h);
-    ctx.fillStyle = 'rgb(' + colB.join(',') + ')';
     for (var i = 0; i < chains.length; i++) {
-      ctx.beginPath();
-      ctx.arc(X(chains[i].u), Y(chains[i].v), 2.2, 0, 6.2832);
-      ctx.fill();
+      var cx = X(chains[i].u), cy = Y(chains[i].v);
+      ctx.fillStyle = 'rgba(' + colB.join(',') + ',0.18)';
+      ctx.beginPath(); ctx.arc(cx, cy, 6, 0, 6.2832); ctx.fill();
+      ctx.fillStyle = 'rgb(' + colB.join(',') + ')';
+      ctx.beginPath(); ctx.arc(cx, cy, 2.2, 0, 6.2832); ctx.fill();
     }
   }
 
@@ -129,6 +134,10 @@
     if (dirty) renderDensity();
     step();
     draw();
+    if (++tick % 20 === 0 && accEl && prop) {
+      accEl.textContent = (accd / prop).toFixed(2);
+      prop *= 0.5; accd *= 0.5;
+    }
     raf = requestAnimationFrame(frame);
   }
   function start() { if (!raf && !reduce) raf = requestAnimationFrame(frame); }
@@ -147,7 +156,7 @@
   function resize() {
     var r = hero.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
     w = r.width; h = r.height;
-    px0 = w > 820 ? w * 0.48 : 0; pw = w - px0;
+    px0 = w > 900 ? w * 0.46 : 0; pw = w - px0;
     canvas.width = w * dpr; canvas.height = h * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     trail.width = w * dpr; trail.height = h * dpr;
@@ -187,6 +196,9 @@
     var onScheme = function () { readColors(); if (reduce) staticFrame(); };
     if (mq.addEventListener) mq.addEventListener('change', onScheme); else mq.addListener(onScheme);
   }
+
+  document.addEventListener('themechange', function () { readColors(); if (reduce) staticFrame(); });
+  if (nEl) nEl.textContent = NC;
 
   readColors(); resize(); initChains();
   if (reduce) staticFrame(); else start();
